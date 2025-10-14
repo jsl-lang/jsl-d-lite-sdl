@@ -28,7 +28,8 @@ unittest {
 		SDLNode("nd", null, [SDLAttribute("a", SDLValue.int_(1)), SDLAttribute("b", SDLValue.int_(2))]),
 		SDLNode("ne", null, null, [
 			SDLNode("foo:nf", null, null, [
-				SDLNode("ng")
+				SDLNode("ng"),
+				SDLNode("", [SDLValue.text("foo")])
 			]),
 		])
 	]);
@@ -40,6 +41,7 @@ nd a=1 b=2
 ne {
 	foo:nf {
 		ng
+		"foo"
 	}
 }
 `, app.data);
@@ -52,9 +54,14 @@ void generateSDLang(R)(ref R dst, auto ref const(SDLNode) node, size_t level = 0
 {
 	auto name = node.qualifiedName == "content" ? "" : node.qualifiedName;
 	dst.putIndentation(level);
-	dst.put(name);
+	bool put_space = false;
+	if (name.length) {
+		dst.put(name);
+		put_space = true;
+	}
 	foreach (ref v; node.values) {
-		dst.put(' ');
+		if (put_space) dst.put(' ');
+		else put_space = true;
 		dst.generateSDLang(v);
 	}
 	foreach (ref a; node.attributes) {
